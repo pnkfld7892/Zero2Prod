@@ -1,4 +1,7 @@
+use std::net::TcpListener;
+
 use actix_web::{web, App, HttpRequest, HttpServer, Responder, HttpResponse};
+use actix_web::dev::Server;
 
 
 async fn health_check(_req: HttpRequest) -> impl Responder {
@@ -6,14 +9,13 @@ async fn health_check(_req: HttpRequest) -> impl Responder {
 }
 
 // #[tokio::main]
-pub async fn run() -> Result<(), std::io::Error> {
-    HttpServer::new(|| {
+pub fn run(listener: TcpListener) -> Result<Server, std::io::Error> {
+    let server = HttpServer::new(|| {
         App::new()
-            // .route("/", web::get().to(greet))
-            // .route("/{name}", web::get().to(greet))
             .route("/health_check", web::get().to(health_check))
     })
-    .bind("127.0.0.1:8000")?
-    .run()
-    .await
+    // .bind(address)?
+    .listen(listener)?
+    .run();
+    Ok(server)
 }
